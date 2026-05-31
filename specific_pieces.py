@@ -55,10 +55,6 @@ class Rook(Piece):
     """
 
     def isValidMove(self, newPosition: Position, board: 'Board') -> bool:
-        """
-        Vérifie si le déplacement de la Tour est valide.
-        La Tour se déplace horizontalement ou verticalement sans obstacle.
-        """
         if not ('a' <= newPosition.column <= 'h' and 1 <= newPosition.row <= 8):
             return False
 
@@ -73,19 +69,13 @@ class Rook(Piece):
         if dc == 0 and dr == 0:
             return False
 
-        # Déplacement horizontal ou vertical uniquement
         if (dc > 0 and dr == 0) or (dc == 0 and dr > 0):
             target_piece = board.getPiece(newPosition)
             if target_piece is not None and target_piece.color == self.color:
                 return False
-            # Vérification des obstacles sur le chemin
             return board.isPathClear(self.position, newPosition)
 
         return False
-
-    def __str__(self) -> str:
-        """Retourne l'initiale de la Tour."""
-        return "R"
 
 
 class Bishop(Piece):
@@ -228,33 +218,24 @@ class Pawn(Piece):
         r2 = newPosition.row
 
         dc = abs(c2 - c1)
-        dr = r2 - r1  # Différence signée car la direction dépend de la couleur
+        dr = r2 - r1
 
         direction = 1 if self.color == 0 else -1
         start_row = 2 if self.color == 0 else 7
 
-        # 1. Déplacement tout droit (pas de capture)
         if dc == 0:
-            # Avancer d'une case
             if dr == direction:
                 return board.getPiece(newPosition) is None
-            # Avancer de deux cases depuis la ligne de départ
             elif dr == 2 * direction and r1 == start_row:
                 intermediate_pos = Position(self.position.column, r1 + direction)
-                return (board.getPiece(intermediate_pos) is None and 
+                return (board.getPiece(intermediate_pos) is None and
                         board.getPiece(newPosition) is None)
 
-        # 2. Capture en diagonale
         elif dc == 1 and dr == direction:
             target_piece = board.getPiece(newPosition)
-            # Il doit y avoir une pièce ennemie sur la case de destination
             return target_piece is not None and target_piece.color != self.color
 
         return False
-
-    def __str__(self) -> str:
-        """Retourne l'initiale du Pion."""
-        return "P"
 
 
 if __name__ == "__main__":
