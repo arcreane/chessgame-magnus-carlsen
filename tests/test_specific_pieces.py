@@ -135,6 +135,12 @@ class TestSpecificPieces(unittest.TestCase):
         self.assertTrue(pawn_black.isValidMove(Position("e", 6), self.board))
         self.assertTrue(pawn_black.isValidMove(Position("e", 5), self.board))
 
+    def test_position_boundaries(self):
+        """Vérifie que les pièces ne peuvent pas sortir de l'échiquier (limites a-h et 1-8)."""
+        pawn = Pawn(Position("e", 2), 0)
+        self.assertFalse(pawn.isValidMove(Position("e", 9), self.board))
+        self.assertFalse(pawn.isValidMove(Position("i", 2), self.board))
+
 
 if __name__ == "__main__":
     unittest.main()

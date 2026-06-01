@@ -1,3 +1,7 @@
+"""
+Interface graphique pour le jeu d'échecs Magnus Carlsen.
+Permet de jouer en mode joueur contre joueur ou contre l'ordinateur (MagnusBot).
+"""
 import os
 import pygame
 from position import Position
