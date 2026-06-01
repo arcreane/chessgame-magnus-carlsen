@@ -13,7 +13,35 @@ class King(Piece):
     """
 
     def isValidMove(self, newPosition: Position, board: 'Board') -> bool:
-        # TODO: À implémenter par Maxime
+        """
+        Vérifie si le déplacement du Roi est valide.
+        Le Roi se déplace d'une case dans n'importe quelle direction.
+        """
+        # Vérification des limites du plateau
+        if not ('a' <= newPosition.column <= 'h' and 1 <= newPosition.row <= 8):
+            return False
+
+        c1 = ord(self.position.column) - ord('a')
+        r1 = self.position.row
+        c2 = ord(newPosition.column) - ord('a')
+        r2 = newPosition.row
+
+        dc = abs(c2 - c1)
+        dr = abs(r2 - r1)
+
+        # Pas de déplacement sur place
+        if dc == 0 and dr == 0:
+            return False
+
+        # Le Roi se déplace d'au plus 1 case en colonne et en ligne
+        if dc <= 1 and dr <= 1:
+            target_piece = board.getPiece(newPosition)
+            # Ne peut pas prendre sa propre couleur
+            if target_piece is not None and target_piece.color == self.color:
+                return False
+            return True
+
+        return False
         raise NotImplementedError("isValidMove() non implémentée pour King")
 
     def __str__(self) -> str:
