@@ -8,13 +8,12 @@ from specific_pieces import King, Queen, Bishop, Knight, Rook, Pawn
 
 class Chess:
     """
-    Moteur de jeu d'échecs en mode console.
     Gère le plateau, les joueurs, la boucle de jeu, la validation des coups et la sauvegarde.
     """
 
     def __init__(self):
         """
-        Initialise une nouvelle partie d'échecs.
+
         """
         self._board = Board()
         self._players = []
@@ -38,7 +37,6 @@ class Chess:
     def initPlayers(self):
         """
         Initialise les joueurs en demandant leurs noms.
-        Si un nom saisi est "AI", un AIPlayer est instancié.
         """
         print("--- Initialisation des Joueurs ---")
         name1 = input("Entrez le nom du Joueur 1 (Blancs) [Saisir 'AI' pour l'ordinateur] : ").strip()
@@ -84,10 +82,7 @@ class Chess:
 
     def isValidMove(self, move: str) -> bool:
         """
-        Analyse la saisie du coup (ex: "Pe2 Pe4") et valide si le coup respecte les règles.
 
-        :param move: La chaîne saisie par l'utilisateur.
-        :return: True si le déplacement est légal, False sinon.
         """
         # Vérification syntaxique de la saisie (longueur de 7, espace au milieu)
         if len(move) != 7 or move[3] != ' ':
@@ -122,13 +117,13 @@ class Chess:
         if str(piece) != p1:
             return False
 
-        # Validation mathématique par la pièce spécifique
+        #
         return piece.isValidMove(end_pos, self._board)
 
     def isCheckMate(self) -> bool:
         """
         Détermine si la partie est terminée par échec et mat.
-        Pour cette version du projet, retourne toujours False.
+
         """
         return False
 
@@ -136,7 +131,7 @@ class Chess:
         """
         Met à jour le plateau de jeu après validation d'un coup.
 
-        :param move: La chaîne du coup validé (ex: "Pe2 Pe4").
+
         """
         col1_str, row1_str = move[1], move[2]
         col2_str, row2_str = move[5], move[6]
@@ -159,7 +154,7 @@ class Chess:
         """
         Sauvegarde l'état actuel de la partie dans un fichier JSON.
 
-        :param filename: Le nom du fichier de sauvegarde.
+
         """
         state = {
             "players": [
@@ -187,7 +182,7 @@ class Chess:
         """
         Restaure une partie sauvegardée depuis un fichier JSON.
 
-        :param filename: Le nom du fichier à charger.
+
         """
         with open(filename, 'r', encoding='utf-8') as f:
             state = json.load(f)
@@ -254,7 +249,7 @@ class Chess:
         # Boucle principale
         while not self.isCheckMate():
             self.displayBoard()
-            
+
             valid_move = False
             while not valid_move:
                 # Si c'est l'IA, on lui passe le board pour accélérer son choix de coups
@@ -284,7 +279,8 @@ class Chess:
                 else:
                     # L'IA réessaie silencieusement, l'humain reçoit un message d'erreur
                     if not isinstance(self._currentPlayer, AIPlayer):
-                        print("Coup invalide. Vérifiez la syntaxe (ex: 'Pe2 Pe4') et le déplacement autorisé de la pièce.")
+                        print(
+                            "Coup invalide. Vérifiez la syntaxe (ex: 'Pe2 Pe4') et le déplacement autorisé de la pièce.")
 
             self.switchPlayer()
 
@@ -292,13 +288,13 @@ class Chess:
 if __name__ == "__main__":
     print("--- Test unitaire de la classe Chess ---")
     game = Chess()
-    
+
     # Simulation manuelle simplifiée pour tester
     p1 = Player("Alice", 0)
     p2 = Player("Bob", 1)
     game._players = [p1, p2]
     game._currentPlayer = p1
-    
+
     print("Test validation d'un coup blanc valide (pion e2 e4) :")
     coup = "Pe2 Pe4"
     if game.isValidMove(coup):
