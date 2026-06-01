@@ -4,15 +4,10 @@ from specific_pieces import King, Queen, Bishop, Knight, Rook, Pawn
 
 
 class Board:
-    """
-    Représente le plateau d'échecs (l'échiquier).
-    Il gère l'état des cases, le placement initial des pièces et les mouvements physiques.
-    """
+    
 
     def __init__(self):
-        """
-        Initialise le plateau avec les pièces à leur position de départ standard.
-        """
+        
         self._grid = {}
         # Initialise toutes les cases à None
         for col_char in ["a", "b", "c", "d", "e", "f", "g", "h"]:
@@ -22,12 +17,8 @@ class Board:
         self._setupInitialPieces()
 
     def _setupInitialPieces(self):
-        """
-        Place les pièces blanches et noires à leurs positions initiales.
-        """
-        # Couleur 0 = Blanc, Couleur 1 = Noir
-
-        # 1. Placement des pions
+        
+        
         for col_char in ["a", "b", "c", "d", "e", "f", "g", "h"]:
             # Pions blancs sur la ligne 2
             pos_white_pawn = Position(col_char, 2)
@@ -54,25 +45,14 @@ class Board:
 
     @property
     def grid(self) -> dict:
-        """Retourne le dictionnaire interne représentant l'échiquier."""
         return self._grid
 
     def getPiece(self, position: Position) -> Piece or None:
-        """
-        Retourne la pièce située à la position donnée.
-
-        :param position: Un objet Position.
-        :return: L'objet Piece s'il y en a un, ou None.
-        """
+        
         return self._grid.get(str(position), None)
 
     def getPosition(self, piece: Piece) -> Position or None:
-        """
-        Cherche la pièce sur le plateau et retourne sa position sous forme d'un objet Position.
-
-        :param piece: L'objet Piece à chercher.
-        :return: L'objet Position correspondant, ou None si non trouvé.
-        """
+        
         for pos_str, p in self._grid.items():
             if p is piece:
                 col = pos_str[0]
@@ -81,13 +61,7 @@ class Board:
         return None
 
     def movePiece(self, start: Position, end: Position):
-        """
-        Déplace physiquement une pièce sur le plateau de sa position de départ
-        à sa position d'arrivée, et met à jour l'attribut de position de la pièce.
-
-        :param start: Position d'origine.
-        :param end: Position de destination.
-        """
+        
         piece = self.getPiece(start)
         if piece is not None:
             piece.position = end
@@ -95,15 +69,7 @@ class Board:
             self._grid[str(start)] = None
 
     def isPathClear(self, start: Position, end: Position) -> bool:
-        """
-        Vérifie s'il y a un obstacle (une pièce) sur le chemin entre 'start' et 'end'.
-        Cette méthode s'applique aux mouvements rectilignes et diagonaux.
-        Les cases de départ et d'arrivée ne sont pas vérifiées.
-
-        :param start: Position de départ.
-        :param end: Position d'arrivée.
-        :return: True si aucune pièce ne bloque le chemin, False sinon.
-        """
+        
         c1 = ord(start.column) - ord('a')
         r1 = start.row
         c2 = ord(end.column) - ord('a')
