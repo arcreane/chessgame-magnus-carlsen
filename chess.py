@@ -7,39 +7,31 @@ from specific_pieces import King, Queen, Bishop, Knight, Rook, Pawn
 
 
 class Chess:
-    """
-    Moteur de jeu d'échecs en mode console.
-    Gère le plateau, les joueurs, la boucle de jeu, la validation des coups et la sauvegarde.
-    """
+    
 
     def __init__(self):
-        """
-        Initialise une nouvelle partie d'échecs.
-        """
+        
         self._board = Board()
         self._players = []
         self._currentPlayer = None
 
     @property
     def board(self) -> Board:
-        """Retourne le plateau de jeu."""
+    
         return self._board
 
     @property
     def players(self) -> list:
-        """Retourne la liste des joueurs."""
+        
         return self._players
 
     @property
     def currentPlayer(self) -> Player:
-        """Retourne le joueur actif."""
+        
         return self._currentPlayer
 
     def initPlayers(self):
-        """
-        Initialise les joueurs en demandant leurs noms.
-        Si un nom saisi est "AI", un AIPlayer est instancié.
-        """
+       
         print("--- Initialisation des Joueurs ---")
         name1 = input("Entrez le nom du Joueur 1 (Blancs) [Saisir 'AI' pour l'ordinateur] : ").strip()
         if not name1:
@@ -60,10 +52,7 @@ class Chess:
         self._currentPlayer = self._players[0]
 
     def displayBoard(self):
-        """
-        Affiche l'échiquier dans la console de manière lisible.
-        Les pièces blanches sont affichées en MAJUSCULES, les noires en minuscules.
-        """
+       
         print("\n   a  b  c  d  e  f  g  h")
         print("  +----------------------+")
         for row in range(8, 0, -1):
@@ -83,12 +72,7 @@ class Chess:
         print("   a  b  c  d  e  f  g  h\n")
 
     def isValidMove(self, move: str) -> bool:
-        """
-        Analyse la saisie du coup (ex: "Pe2 Pe4") et valide si le coup respecte les règles.
-
-        :param move: La chaîne saisie par l'utilisateur.
-        :return: True si le déplacement est légal, False sinon.
-        """
+        
         # Vérification syntaxique de la saisie (longueur de 7, espace au milieu)
         if len(move) != 7 or move[3] != ' ':
             return False
@@ -126,18 +110,11 @@ class Chess:
         return piece.isValidMove(end_pos, self._board)
 
     def isCheckMate(self) -> bool:
-        """
-        Détermine si la partie est terminée par échec et mat.
-        Pour cette version du projet, retourne toujours False.
-        """
+        
         return False
 
     def updateBoard(self, move: str):
-        """
-        Met à jour le plateau de jeu après validation d'un coup.
-
-        :param move: La chaîne du coup validé (ex: "Pe2 Pe4").
-        """
+        
         col1_str, row1_str = move[1], move[2]
         col2_str, row2_str = move[5], move[6]
 
@@ -147,20 +124,14 @@ class Chess:
         self._board.movePiece(start_pos, end_pos)
 
     def switchPlayer(self):
-        """
-        Bascule le tour de jeu entre les deux joueurs.
-        """
+        
         if self._currentPlayer == self._players[0]:
             self._currentPlayer = self._players[1]
         else:
             self._currentPlayer = self._players[0]
 
     def saveGame(self, filename: str):
-        """
-        Sauvegarde l'état actuel de la partie dans un fichier JSON.
-
-        :param filename: Le nom du fichier de sauvegarde.
-        """
+        
         state = {
             "players": [
                 {
@@ -184,11 +155,7 @@ class Chess:
             json.dump(state, f, indent=4, ensure_ascii=False)
 
     def loadGame(self, filename: str):
-        """
-        Restaure une partie sauvegardée depuis un fichier JSON.
-
-        :param filename: Le nom du fichier à charger.
-        """
+        
         with open(filename, 'r', encoding='utf-8') as f:
             state = json.load(f)
 
@@ -225,9 +192,7 @@ class Chess:
             self._board.grid[pos_str] = piece_class(pos, p_data["color"])
 
     def play(self):
-        """
-        Boucle principale du jeu gérant les tours alternés.
-        """
+        
         print("========================================")
         print("          BIENVENUE AUX ÉCHECS          ")
         print("========================================\n")
