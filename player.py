@@ -49,7 +49,6 @@ class Player:
         move = input(f"[{color_str}] {self._name}, entrez votre coup (ex: Pe2 Pe4, ou 'save' / 'quit') : ")
         return move.strip()
 
-
 class AIPlayer(Player):
     """
     Représente un joueur virtuel (Intelligence Artificielle) qui génère ses coups aléatoirement.
@@ -106,17 +105,3 @@ class AIPlayer(Player):
         move = f"{piece}{c1}{r1} {piece}{c2}{r2}"
         print(f"[{'Blanc' if self.color == 0 else 'Noir'}] {self.name} (IA) joue : {move}")
         return move
-
-
-
-if __name__ == "__main__":
-    print("--- Test unitaire de la classe Player et AIPlayer ---")
-    humain = Player("Thomas", 0)
-    print(f"Joueur humain créé : {humain.name}, Couleur : {humain.color}")
-    
-    ia = AIPlayer("Robot-1", 1)
-    print(f"Joueur IA créé : {ia.name}, Couleur : {ia.color}")
-    
-    # Test askMove de l'IA (génère un coup aléatoire)
-    coup_ia = ia.askMove()
-    print(f"Coup aléatoire généré par l'IA : {coup_ia}")
