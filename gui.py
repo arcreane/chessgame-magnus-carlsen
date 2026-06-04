@@ -123,6 +123,72 @@ def draw_board(screen, board, selected_pos, current_turn):
                 screen.blit(surf, surf.get_rect(center=center))
 
 
+def save_game(board, current_turn, game_mode, filename="sauvegarde.json"):
+    """Sauvegarde la partie au format JSON compatible."""
+    import json
+    w_is_ai = False
+    b_is_ai = (game_mode == "vs_ai")
+    state = {
+        "players": [
+            {"name": "Joueur Blanc", "color": 0, "is_ai": w_is_ai},
+            {"name": "MagnusBot" if b_is_ai else "Joueur Noir", "color": 1, "is_ai": b_is_ai}
+        ],
+        "currentPlayerIndex": current_turn,
+        "board": {
+            pos_str: {"type": str(piece), "color": piece.color}
+            for pos_str, piece in board.grid.items() if piece is not None
+        }
+    }
+    try:
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(state, f, indent=4, ensure_ascii=False)
+        return True
+    except Exception as e:
+        print(f"Erreur de sauvegarde : {e}")
+        return False
+
+
+def load_game(board, filename="sauvegarde.json"):
+    """Charge la partie depuis un fichier JSON."""
+    import json
+    if not os.path.exists(filename):
+        return None
+    try:
+        with open(filename, 'r', encoding='utf-8') as f:
+            state = json.load(f)
+
+        board.grid.clear()
+        for col_char in ["a", "b", "c", "d", "e", "f", "g", "h"]:
+            for row in range(1, 9):
+                board.grid[f"{col_char}{row}"] = None
+
+        from specific_pieces import King, Queen, Bishop, Knight, Rook, Pawn
+        piece_mapping = {
+            "K": King,
+            "Q": Queen,
+            "B": Bishop,
+            "N": Knight,
+            "R": Rook,
+            "P": Pawn
+        }
+
+        for pos_str, p_data in state["board"].items():
+            col = pos_str[0]
+            row = int(pos_str[1])
+            pos = Position(col, row)
+            piece_class = piece_mapping[p_data["type"]]
+            board.grid[pos_str] = piece_class(pos, p_data["color"])
+
+        current_turn = state["currentPlayerIndex"]
+        b_is_ai = state["players"][1]["is_ai"]
+        game_mode = "vs_ai" if b_is_ai else "vs_human"
+
+        return current_turn, game_mode
+    except Exception as e:
+        print(f"Erreur de chargement : {e}")
+        return None
+
+
 def main():
     """Initialise et lance l'affichage graphique simplifié."""
     pygame.init()
@@ -138,16 +204,19 @@ def main():
     current_turn = 0  # 0: Blancs, 1: Noirs
     game_mode = "vs_human"  # "vs_human" ou "vs_ai"
     ai_delay_timer = None
+    status_msg = ""
 
     # Polices de texte
     btn_font = pygame.font.SysFont("arial", 14, bold=True)
     title_font = pygame.font.SysFont("arial", 22, bold=True)
 
     # Coordonnées des boutons
-    R_VS_HUMAN = pygame.Rect(660, 160, 315, 50)
-    R_VS_AI = pygame.Rect(660, 230, 315, 50)
-    R_RESTART = pygame.Rect(660, 340, 315, 50)
-    R_QUIT = pygame.Rect(660, 410, 315, 50)
+    R_VS_HUMAN = pygame.Rect(660, 150, 315, 40)
+    R_VS_AI = pygame.Rect(660, 200, 315, 40)
+    R_SAVE = pygame.Rect(660, 260, 315, 40)
+    R_LOAD = pygame.Rect(660, 310, 315, 40)
+    R_RESTART = pygame.Rect(660, 380, 315, 40)
+    R_QUIT = pygame.Rect(660, 430, 315, 40)
 
     running = True
 
@@ -175,14 +244,17 @@ def main():
                             if selected_pos is None:
                                 if piece is not None and piece.color == current_turn:
                                     selected_pos = clicked_pos
+                                    status_msg = ""
                             else:
                                 if piece is not None and piece.color == current_turn:
                                     selected_pos = clicked_pos
+                                    status_msg = ""
                                 else:
                                     active_piece = board.getPiece(selected_pos)
                                     if active_piece is not None and active_piece.isValidMove(clicked_pos, board):
                                         board.movePiece(selected_pos, clicked_pos)
                                         current_turn = 1 - current_turn
+                                        status_msg = ""
                                         if game_mode == "vs_ai" and current_turn == 1:
                                             ai_delay_timer = pygame.time.get_ticks() + 800
                                     selected_pos = None
@@ -191,15 +263,32 @@ def main():
                     else:
                         if R_VS_HUMAN.collidepoint(mx, my):
                             game_mode = "vs_human"
+                            status_msg = "Mode VS Humain activé."
                         elif R_VS_AI.collidepoint(mx, my):
                             game_mode = "vs_ai"
+                            status_msg = "Mode VS Ordinateur activé."
                             if current_turn == 1:
                                 ai_delay_timer = pygame.time.get_ticks() + 800
+                        elif R_SAVE.collidepoint(mx, my):
+                            if save_game(board, current_turn, game_mode):
+                                status_msg = "Partie sauvegardée !"
+                            else:
+                                status_msg = "Erreur de sauvegarde."
+                        elif R_LOAD.collidepoint(mx, my):
+                            res = load_game(board)
+                            if res is not None:
+                                current_turn, game_mode = res
+                                selected_pos = None
+                                ai_delay_timer = None
+                                status_msg = "Partie rechargée !"
+                            else:
+                                status_msg = "Aucune sauvegarde trouvée."
                         elif R_RESTART.collidepoint(mx, my):
                             board = Board()
                             selected_pos = None
                             current_turn = 0
                             ai_delay_timer = None
+                            status_msg = "Partie réinitialisée."
                         elif R_QUIT.collidepoint(mx, my):
                             running = False
 
@@ -208,14 +297,14 @@ def main():
             if ai_delay_timer is not None and pygame.time.get_ticks() >= ai_delay_timer:
                 ai_delay_timer = None
                 move_str = ai_player.askMove(board)
-                
+
                 if len(move_str) == 7 and move_str[3] == ' ':
                     s_col, s_row = move_str[1], int(move_str[2])
                     e_col, e_row = move_str[5], int(move_str[6])
-                    
+
                     s_pos = Position(s_col, s_row)
                     e_pos = Position(e_col, e_row)
-                    
+
                     active_piece = board.getPiece(s_pos)
                     if active_piece is not None and active_piece.isValidMove(e_pos, board):
                         board.movePiece(s_pos, e_pos)
@@ -243,9 +332,19 @@ def main():
         draw_button(screen, btn_font, R_VS_HUMAN, "VS HUMAIN", game_mode == "vs_human", R_VS_HUMAN.collidepoint(mx, my))
         draw_button(screen, btn_font, R_VS_AI, "VS ORDI (IA)", game_mode == "vs_ai", R_VS_AI.collidepoint(mx, my))
 
+        # Dessin des boutons de sauvegarde / chargement
+        draw_button(screen, btn_font, R_SAVE, "SAUVEGARDER LA PARTIE", False, R_SAVE.collidepoint(mx, my))
+        draw_button(screen, btn_font, R_LOAD, "CHARGER LA PARTIE", False, R_LOAD.collidepoint(mx, my))
+
         # Dessin des boutons d'actions générales
         draw_button(screen, btn_font, R_RESTART, "RECOMMENCER LA PARTIE", False, R_RESTART.collidepoint(mx, my))
         draw_button(screen, btn_font, R_QUIT, "QUITTER", False, R_QUIT.collidepoint(mx, my))
+
+        # Message de statut
+        if status_msg:
+            status_surf = btn_font.render(status_msg, True, TEXT_GOLD)
+            status_rect = status_surf.get_rect(center=(820, 520))
+            screen.blit(status_surf, status_rect)
 
         pygame.display.flip()
         clock.tick(30)
